@@ -59,10 +59,18 @@ const RequestModel = mongoose.model<IRequest>('Request', requestSchema);
 // Connect to MongoDB
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://deelakagalpaya:MzjEXFQsNCZtZb8Y@cluster0.hstsl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster';
 
-mongoose.connect(MONGO_URI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((error: Error) => console.error('MongoDB connection error:', error));
-
+mongoose.connect(MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 15000, // Wait 15 seconds for a server to be available
+  socketTimeoutMS: 45000 // Close sockets after 45 seconds
+})
+.then(() => {
+  console.log('Connected to MongoDB');
+})
+.catch((error: Error) => {
+  console.error('MongoDB connection error:', error);
+});
 
 // Multer Configuration for File Uploads
 const storage = multer.diskStorage({

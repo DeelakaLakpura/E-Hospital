@@ -59,9 +59,18 @@ const RequestModel = mongoose.model<IRequest>('Request', requestSchema);
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://deelakagalpaya:MzjEXFQsNCZtZb8Y@cluster0.hstsl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster';
 
-mongoose.connect(MONGO_URI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((error: Error) => console.error('MongoDB connection error:', error));
+mongoose.connect(MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 15000,
+  socketTimeoutMS: 45000 
+})
+.then(() => {
+  console.log('Connected to MongoDB');
+})
+.catch((error: Error) => {
+  console.error('MongoDB connection error:', error);
+});
 
 
 
