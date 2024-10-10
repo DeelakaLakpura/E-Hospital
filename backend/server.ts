@@ -16,7 +16,7 @@ const app = express();
 
 
 app.use(cors({
-  origin: 'http://localhost:3000', 
+  origin: 'https://skilltest01.netlify.app/', 
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   credentials: true,
 }));
