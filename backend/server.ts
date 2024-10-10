@@ -202,7 +202,7 @@ app.delete('/api/requests/:id', async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error deleting request' });
   }
 });
-// Start the Server
+
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
