@@ -60,7 +60,7 @@ const requestSchema = new mongoose_1.Schema({
     guestName: { type: String, required: true },
     phoneNumber: { type: String, required: true },
     service: { type: String, required: true },
-    status: { type: String, enum: ['PENDING', 'IN_PROGRESS', 'COMPLETED'], default: 'PENDING' },
+    status: { type: String, enum: ['NEW', 'PENDING', 'IN_PROGRESS', 'COMPLETED'], default: 'NEW' },
     department: { type: String, required: true },
     createdOn: { type: Date, required: true, default: Date.now },
     priority: { type: String, enum: ['HIGH', 'MEDIUM', 'LOW'], default: 'MEDIUM' },

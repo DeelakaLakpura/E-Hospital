@@ -1,5 +1,3 @@
-// server.ts
-
 import express, { Request, Response } from 'express';
 import mongoose, { Schema, Document } from 'mongoose';
 
@@ -15,6 +13,8 @@ dotenv.config();
 const app = express();
 
 
+app.use(cors());
+
 app.use(cors({
   origin: 'http://localhost:3000', 
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
@@ -24,7 +24,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Mongoose Interface
+
 interface IRequest extends Document {
   floor: string;
   room: string;
@@ -39,7 +39,7 @@ interface IRequest extends Document {
   file?: string;
 }
 
-// Mongoose Schema
+
 const requestSchema: Schema = new Schema({
   floor: { type: String, required: true },
   room: { type: String, required: true },
@@ -47,7 +47,7 @@ const requestSchema: Schema = new Schema({
   guestName: { type: String, required: true },
   phoneNumber: { type: String, required: true },
   service: { type: String, required: true },
-  status: { type: String, enum: ['PENDING', 'IN_PROGRESS', 'COMPLETED'], default: 'PENDING' },
+  status: { type: String, enum: ['NEW', 'PENDING', 'IN_PROGRESS', 'COMPLETED'], default: 'NEW' },
   department: { type: String, required: true },
   createdOn: { type: Date, required: true, default: Date.now },
   priority: { type: String, enum: ['HIGH', 'MEDIUM', 'LOW'], default: 'MEDIUM' },
@@ -56,7 +56,7 @@ const requestSchema: Schema = new Schema({
 
 const RequestModel = mongoose.model<IRequest>('Request', requestSchema);
 
-// Connect to MongoDB
+
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://deelakagalpaya:MzjEXFQsNCZtZb8Y@cluster0.hstsl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster';
 
 mongoose.connect(MONGO_URI)
@@ -64,7 +64,7 @@ mongoose.connect(MONGO_URI)
   .catch((error: Error) => console.error('MongoDB connection error:', error));
 
 
-// Multer Configuration for File Uploads
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, './uploads/');
@@ -75,55 +75,34 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Helper Function to Generate Document ID (Optional)
-function generateDocumentId(): string {
-  const prefix = 'small'; // Customize as needed
-  const uniqueNumber = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-  return `${prefix}${uniqueNumber}`;
-}
 
-// Routes
 
-/**
- * @route   POST /api/requests
- * @desc    Create a new request
- * @access  Public
- */
-app.post('/api/requests', upload.single('file'), async (req: Request, res: Response) => {
-  const { floor, room, block, guestName, phoneNumber, service, department, priority } = req.body;
-  const file = req.file ? req.file.filename : undefined;
+const Request = mongoose.model('Request', requestSchema);
+
+
+app.use(cors());
+app.use(express.json());
+
+app.post('/api/requests', upload.single('file'), async (req, res) => {
+  const { floor, room, block, guestName, phoneNumber, service, department } = req.body;
 
   if (!floor || !room || !block || !guestName || !phoneNumber || !service || !department) {
      res.status(400).json({ message: 'Missing required fields' });
   }
 
   try {
-    const newRequest = new RequestModel({
-      floor,
-      room,
-      block,
-      guestName,
-      phoneNumber,
-      service,
-      department,
-      priority: priority || 'MEDIUM',
-      status: 'PENDING', // Ensure status is set to a valid enum value
-      file,
-      // 'createdOn' is omitted to use the default value
+    const newRequest = new Request({
+      ...req.body,
+      file: req.file ? req.file.path : null, 
     });
 
-    console.log('newRequest.createdOn:', newRequest.createdOn); // Debugging line
-
     await newRequest.save();
-    res.status(201).json({ message: 'Request submitted successfully!', requestId: newRequest._id });
+    res.status(201).json({ message: 'Request created successfully!', request: newRequest });
   } catch (error) {
-    console.error('Error saving request:', error);
-    res.status(500).json({ message: 'Error submitting request' });
+    console.error('Error creating request', error);
+    res.status(500).json({ message: 'Error creating request' });
   }
 });
-
-
-
 /**
  * @route   GET /api/capture
  * @desc    Retrieve all requests
@@ -145,35 +124,33 @@ app.patch('/api/requests/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
   const updatedData = req.body;
 
-  // Define Allowed Fields for Update
   const allowedUpdates = ['floor', 'room', 'block', 'guestName', 'phoneNumber', 'service', 'department', 'priority', 'status', 'file'];
   const actualUpdates = Object.keys(updatedData);
   const isValidOperation = actualUpdates.every(field => allowedUpdates.includes(field));
 
   if (!isValidOperation) {
-     res.status(400).json({ message: 'Invalid updates' });
+       res.status(400).json({ message: 'Invalid updates' });
   }
 
-  // Validate priority field
   if (updatedData.priority && !['HIGH', 'MEDIUM', 'LOW'].includes(updatedData.priority)) {
-     res.status(400).json({ message: 'Invalid priority' });
+       res.status(400).json({ message: 'Invalid priority' });
+  }
+
+  if (updatedData.status && !['PENDING', 'IN_PROGRESS', 'COMPLETED'].includes(updatedData.status)) {
+       res.status(400).json({ message: 'Invalid status' });
   }
 
   try {
-    const updatedRequest = await RequestModel.findByIdAndUpdate(id, updatedData, { new: true, runValidators: true });
-    if (!updatedRequest) {
-       res.status(404).json({ message: 'Request not found' });
-    }
+      const updatedRequest = await RequestModel.findByIdAndUpdate(id, updatedData, { new: true, runValidators: true });
 
-    // Validate status field
-    if (updatedData.status && !['PENDING', 'IN_PROGRESS', 'COMPLETED'].includes(updatedData.status)) {
-       res.status(400).json({ message: 'Invalid status' });
-    }
+      if (!updatedRequest) {
+           res.status(404).json({ message: 'Request not found' });
+      }
 
-    res.status(200).json({ message: 'Request updated successfully!', updatedRequest });
+      res.status(200).json({ message: 'Request updated successfully!', updatedRequest });
   } catch (error) {
-    console.error('Error updating request:', error);
-    res.status(500).json({ message: 'Error updating request' });
+      console.error('Error updating request:', error);
+      res.status(500).json({ message: 'Error updating request' });
   }
 });
 
