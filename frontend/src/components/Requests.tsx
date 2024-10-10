@@ -17,7 +17,7 @@ const RequestSummary = () => {
   const [formData, setFormData] = useState({
     location: '',
     service: '',
-    status: 'NEW', 
+    status: 'PENDING', 
     priority: 'MEDIUM', 
     department: '',
     requestedBy: '',
@@ -41,8 +41,7 @@ const RequestSummary = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-
-
+  
     if (!formData.floor || !formData.room || !formData.block || !formData.guestName || !formData.phoneNumber || !formData.service || !formData.department) {
       Swal.fire({
         icon: 'warning',
@@ -52,7 +51,7 @@ const RequestSummary = () => {
       });
       return;
     }
-
+  
     const formDataToSend = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       if (key === 'file' && value) {
@@ -62,21 +61,21 @@ const RequestSummary = () => {
       }
     });
   
-    formDataToSend.append('createdOn', new Date().toISOString());
-    
+  
+  
     setIsLoading(true); 
     try {
-      const response = await axios.post('http://localhost:5001/api/requests', formDataToSend, {
+      const response = await axios.post('https://e-hospital-s03e.onrender.com/api/requests', formDataToSend, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-
+  
       Swal.fire({
         icon: 'success',
         title: 'Success!',
         text: response.data.message,
         confirmButtonText: 'Okay',
       });
-
+  
       setIsModalOpen(false);
       window.location.reload();
       
@@ -107,9 +106,10 @@ const RequestSummary = () => {
         confirmButtonText: 'Okay',
       });
     } finally {
-      setIsLoading(false); // Reset loading state
+      setIsLoading(false); 
     }
   };
+  
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
