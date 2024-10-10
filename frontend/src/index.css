@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Afacad+Flux:wght@100..1000&display=swap');
+
+body
+{
+    font-family: "Afacad Flux", sans-serif;
+
+}
+
+thead th {
+    text-align: center;
+    background-color: #C19C26;
+  }
+
+
+  
