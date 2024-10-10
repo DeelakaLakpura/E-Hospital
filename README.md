@@ -8,7 +8,9 @@ E-Hospital is a comprehensive web-based hospital management system designed to m
 
 ## Watch the Demo
 
-[![Watch the video](images/01.png)](images/recordedvideo.mov)
+[![Watch the video](https://i.ibb.co/3mTRQs5/istockphoto-1307786410-640x640.jpg)](https://youtu.be/9VzuVGOpdMw)
+
+
 
 Click the image above to watch the full project demo.
 
