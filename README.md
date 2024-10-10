@@ -21,13 +21,13 @@ Click the image above to watch the full project demo.
 Here are some screenshots of the project:
 
 ![Screenshot 1](images/01.png)
-*Login page interface*
+
 
 ![Screenshot 2](images/02.png)
-*Doctor scheduling view*
+
 
 ![Screenshot 3](images/03.png)
-*Patient management dashboard*
+
 
 ---
 
